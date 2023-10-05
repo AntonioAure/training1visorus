@@ -19,8 +19,8 @@ class LibroService {
     AutorService autorService
     CategoriaService categoriaService
     Sql sqlS
-    CalificacionService calificacionService
-    GrailsApplication grailsApplication
+    //CalificacionService calificacionService
+    //GrailsApplication grailsApplication
 
     //Obtener Libros
     List<Libro> getLibrosActivos() throws Exception {
@@ -148,11 +148,31 @@ class LibroService {
         Libro libro = this.get(id)
 
         def file = request.getFile("file")
-        String name= libro.id+"img"+file.getOriginalFilename()
+        boolean valFormat = validateFileFormat(file.getContentType())
+                if (!valFormat)
+                    return null
 
+        String name= libro.id+"img"+file.getOriginalFilename()
+        def storagePath = crearDirectorio()
+
+        // Store file
+        if(!file.isEmpty() && name.length()<23){
+            eliminarFotoAntigua(libro.imagen)
+
+            file.transferTo( new File("${storagePath}\\${name}") )
+            println("Saved File: ${storagePath}\\${name}")
+            libro.imagen="${storagePath}\\${name}"
+            return libro.save(flush: true)
+        }else{
+            println "File: ${file.inspect()} was empty"
+            return null
+        }
+    }
+
+    //crear directorio para imagenes solo si no existe
+    String crearDirectorio(){
         def serveletContext = ServletContextHolder.servletContext
         def storagePath = serveletContext.getRealPath("\\img" )
-
         def storagePathDirectory = new File( storagePath )
 
         if( !storagePathDirectory.exists() ){
@@ -163,21 +183,21 @@ class LibroService {
                 println "FAILED"
             }
         }
+        return storagePath
+    }
 
-        // Store file
-        if(!file.isEmpty() && name.length()<23){
-            File fileAntiguo = new File(libro.imagen)
-            if (fileAntiguo.exists())
-                fileAntiguo.delete()
+    //elimina foto antigua si existe
+    void eliminarFotoAntigua(String storagePath){
+        File fileAntiguo = new File(storagePath)
+        if (fileAntiguo.exists())
+            fileAntiguo.delete()
+    }
 
-            file.transferTo( new File("${storagePath}\\${name}") )
-            println("Saved File: ${storagePath}\\${name}")
-            libro.imagen="${storagePath}\\${name}"
-            return libro.save(flush: true)
-        }else{
-            println "File: ${file.inspect()} was empty"
-            return null
-        }
+    //validar formatos de las imagenes
+    boolean validateFileFormat(String format){
+        if (format.equals("image/jpeg") || format.equals("image/png") || format.equals("image/svg") || format.equals("image/webp"))
+            return true
+        return false
     }
 
 }

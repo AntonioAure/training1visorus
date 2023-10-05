@@ -78,8 +78,9 @@ class LibroController {
     def saveImg(long id) {
         try {
             Libro libro = libroService.uploadImgLibro(id, request)
-            respond(libro, status: HttpStatus.CREATED)
-
+            if (libro==null)
+                respond(status: HttpStatus.BAD_REQUEST, [error: "ocurrio un problema con la imagen"])
+            else respond(libro, status: HttpStatus.CREATED)
         }catch (e){
             respond(status: HttpStatus.BAD_REQUEST, [error: e.getMessage()])
         }
