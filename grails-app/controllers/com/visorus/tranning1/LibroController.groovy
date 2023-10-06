@@ -72,7 +72,6 @@ class LibroController {
         }catch (e){
             respond(status: HttpStatus.BAD_REQUEST, [error: e.getMessage()])
         }
-
     }
 
     def saveImg(long id) {
@@ -81,6 +80,17 @@ class LibroController {
             if (libro==null)
                 respond(status: HttpStatus.BAD_REQUEST, [error: "ocurrio un problema con la imagen"])
             else respond(libro, status: HttpStatus.CREATED)
+        }catch (e){
+            respond(status: HttpStatus.BAD_REQUEST, [error: e.getMessage()])
+        }
+    }
+
+    def cargarDatosLibroAutor(){
+        try {
+            libroService.cargarLibroAutor(request.getJSON())
+            respond( status: HttpStatus.CREATED)
+
+
         }catch (e){
             respond(status: HttpStatus.BAD_REQUEST, [error: e.getMessage()])
         }

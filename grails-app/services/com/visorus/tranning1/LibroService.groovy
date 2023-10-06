@@ -1,7 +1,5 @@
 package com.visorus.tranning1
 
-import ch.qos.logback.core.util.FileUtil
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.web.context.ServletContextHolder
 import groovy.sql.GroovyRowResult
@@ -11,6 +9,8 @@ import org.grails.web.json.JSONObject
 import org.springframework.web.multipart.MultipartHttpServletRequest
 
 import javax.servlet.http.HttpServletRequest
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 
 @Transactional
@@ -199,5 +199,63 @@ class LibroService {
             return true
         return false
     }
+
+    void cargarLibroAutor(JSONArray json) throws Exception {
+        JSONArray jsonA = json
+
+        for(int i; i<jsonA.length(); i++) {
+            JSONObject jsonAutor = new JSONObject("nombre":jsonA.getJSONObject(i).getString("nombreA")
+                                                  , "biografia":jsonA.getJSONObject(i).getString("biografia")
+                                                  , "fechaNacimiento":returnMilis(jsonA.getJSONObject(i).getString("fechaNacimiento")))
+
+            boolean flag = comprobarAutorExistente(jsonA.getJSONObject(i).getString("nombreA"))
+            Autor autorEncontrado
+            long idAutor
+                if (!flag) {
+                    Autor autor = autorService.create(jsonAutor)
+                    idAutor=autor.id
+                }else {
+                    autorEncontrado = getIdAutorExistente(jsonA.getJSONObject(i).getString("nombreA"))
+                    idAutor=autorEncontrado.id
+                }
+
+
+            JSONObject jIdAutor = new JSONObject("id":idAutor)
+
+            JSONObject jsonLibro = new JSONObject("libro":jsonA.getJSONObject(i).getString("libro")
+                                                  , "descripcion":jsonA.getJSONObject(i).getString("descripcion")
+                                                  , "imagen":jsonA.getJSONObject(i).getString("imagen")
+                                                  , "serie":jsonA.getJSONObject(i).getString("serie")
+                                                  , "autor":jIdAutor)
+            Libro libro = create(jsonLibro)
+        }
+
+    }
+
+    long returnMilis(String fechaManual){
+        SimpleDateFormat sd = new SimpleDateFormat("dd-MM-yy");
+        Date date = new Date();
+        try {
+            date = sd.parse(fechaManual);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long milisegs = date.getTime();
+        return  milisegs
+    }
+
+    boolean comprobarAutorExistente(String nombre){
+        Autor aut = Autor.findByNombre(nombre)
+        if (aut!=null)
+            return true
+
+        return false
+    }
+
+    Autor getIdAutorExistente(String nombre){
+        Autor aut = Autor.findByNombre(nombre)
+        return aut
+    }
+
 
 }

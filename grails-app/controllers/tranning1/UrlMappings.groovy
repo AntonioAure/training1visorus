@@ -29,6 +29,7 @@ class UrlMappings {
         put "/$controller/updateCategorias/$id(.$format)?"(action:"categoriasLibro")
         get "/$controller/calGeneralLibro/$id(.$format)?"(action:"calGeneralLibro")
         post "/$controller/uploadImgLibro/$id(.$format)?"(action:"saveImg")
+        post "/$controller/uploadDatosLibroAutor(.$format)?"(action:"cargarDatosLibroAutor")
 
         //endPoints Calificacion
         delete "/$controller/$id(.$format)?"(action:"delete")
