@@ -148,13 +148,18 @@ class LibroService {
     }
 
     //Cargar la Imagen del libro, y actualizar el libro en la bd
-    Libro uploadImgLibro(long id, MultipartHttpServletRequest request){
+    Libro uploadImgLibro(long id, MultipartHttpServletRequest request)throws Exception{
         Libro libro = this.get(id)
 
         def file = request.getFile("file")
+        println(file.getSize()*8)
+        if ((file.getSize()*8)>8000000)
+            return null
+
         boolean valFormat = validateFileFormat(file.getContentType())
                 if (!valFormat)
                     return null
+
 
         String name= libro.id+"img"+file.getOriginalFilename()
         def storagePath = crearDirectorio()
