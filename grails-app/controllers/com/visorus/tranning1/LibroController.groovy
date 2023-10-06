@@ -89,8 +89,6 @@ class LibroController {
         try {
             libroService.cargarLibroAutor(request.getJSON())
             respond( status: HttpStatus.CREATED)
-
-
         }catch (e){
             respond(status: HttpStatus.BAD_REQUEST, [error: e.getMessage()])
         }

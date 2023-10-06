@@ -4,6 +4,7 @@ class Libro {
     String libro
     String descripcion
     String imagen = null
+    //Byte[] imagenBinario
     String serie
     Autor autor
     boolean activo = true

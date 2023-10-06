@@ -35,7 +35,6 @@ class AutorService {
         Autor autor = new Autor()
 
         build(json, autor)
-
         return save(autor)
     }
 
@@ -46,7 +45,6 @@ class AutorService {
         return save(autor)
     }
 
-
     Autor build(JSONObject json, Autor autor)  throws Exception {
         autor.nombre = json.optString("nombre", autor.nombre)
         autor.biografia = json.optString("biografia", autor.biografia)
@@ -54,7 +52,6 @@ class AutorService {
         if (json.optString("activo")) {
             autor.activo = json.optBoolean("activo", autor.activo)
         }
-
         return autor
     }
 

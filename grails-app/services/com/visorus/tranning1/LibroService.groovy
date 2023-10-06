@@ -1,5 +1,6 @@
 package com.visorus.tranning1
 
+import com.fasterxml.jackson.databind.JsonSerializable
 import grails.gorm.transactions.Transactional
 import grails.web.context.ServletContextHolder
 import groovy.sql.GroovyRowResult
@@ -86,6 +87,9 @@ class LibroService {
     Libro save(Libro libro) throws Exception {
         if(libro.validate() && libro.save(flush: true))
             return libro
+        libro.errors.allErrors.each {
+            println(it)
+        }
         throw new Exception("No se pudo guardar")
     }
 
@@ -200,33 +204,27 @@ class LibroService {
         return false
     }
 
+    //Cargar Libros y Autores de un excel que nos mandan desde el front como un Array de Objetos. Carga Batch
     void cargarLibroAutor(JSONArray json) throws Exception {
         JSONArray jsonA = json
 
         for(int i; i<jsonA.length(); i++) {
-            JSONObject jsonAutor = new JSONObject("nombre":jsonA.getJSONObject(i).getString("nombreA")
-                                                  , "biografia":jsonA.getJSONObject(i).getString("biografia")
-                                                  , "fechaNacimiento":returnMilis(jsonA.getJSONObject(i).getString("fechaNacimiento")))
-
             boolean flag = comprobarAutorExistente(jsonA.getJSONObject(i).getString("nombreA"))
             Autor autorEncontrado
-            long idAutor
                 if (!flag) {
-                    Autor autor = autorService.create(jsonAutor)
-                    idAutor=autor.id
+                    JSONObject jsonAutor = new JSONObject("nombre":jsonA.getJSONObject(i).getString("nombreA")
+                            , "biografia":jsonA.getJSONObject(i).getString("biografia")
+                            , "fechaNacimiento":returnMilis(jsonA.getJSONObject(i).getString("fechaNacimiento")))
+                    autorEncontrado = autorService.create(jsonAutor)
                 }else {
-                    autorEncontrado = getIdAutorExistente(jsonA.getJSONObject(i).getString("nombreA"))
-                    idAutor=autorEncontrado.id
+                    autorEncontrado = getAutorExistente(jsonA.getJSONObject(i).getString("nombreA"))
                 }
-
-
-            JSONObject jIdAutor = new JSONObject("id":idAutor)
-
+            JSONObject jAutor = new JSONObject("id":autorEncontrado.id)
             JSONObject jsonLibro = new JSONObject("libro":jsonA.getJSONObject(i).getString("libro")
                                                   , "descripcion":jsonA.getJSONObject(i).getString("descripcion")
                                                   , "imagen":jsonA.getJSONObject(i).getString("imagen")
                                                   , "serie":jsonA.getJSONObject(i).getString("serie")
-                                                  , "autor":jIdAutor)
+                                                  , "autor":jAutor)
             Libro libro = create(jsonLibro)
         }
 
@@ -252,10 +250,8 @@ class LibroService {
         return false
     }
 
-    Autor getIdAutorExistente(String nombre){
+    Autor getAutorExistente(String nombre){
         Autor aut = Autor.findByNombre(nombre)
         return aut
     }
-
-
 }
